@@ -1,0 +1,42 @@
+{
+  "name": "uitests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "codeceptjs": "1.4.4",
+    "faker": "4.1.0",
+    "mailosaur": "^5.0.3",
+    "mochawesome": "^3.1.1",
+    "puppeteer": "1.9.0",
+    "rosie": "2.0.1",
+    "unirest": "0.5.1",
+    "webdriverio": "4.14.0"
+  },
+  "scripts": {
+    "cc": "codeceptjs",
+    "dev": "codeceptjs run --steps --reporter mochawesome",
+    "test": "BROWSERSTACK=1 codeceptjs run --steps",
+    "run-full-suite-on-browserstack": "BROWSERSTACK=1 codeceptjs run-multiple latest",
+    "smoke-prod": "ENVIRONMENT=prod BROWSERSTACK=1 codeceptjs run-multiple latest",
+    "smoke-dev": "ENVIRONMENT=dev BROWSERSTACK=1 codeceptjs run-multiple latest",
+    "bsl": "./BrowserStackLocal --key qr8LWRRrCWtY8bACz9mB"
+  },
+  "devDependencies": {
+    "eslint": "4.19.1",
+    "eslint-config-airbnb": "16",
+    "eslint-config-prettier": "3.0.1",
+    "eslint-config-react-app": "2.1.0",
+    "eslint-import-resolver-webpack": "0.10.0",
+    "eslint-loader": "1",
+    "eslint-plugin-codeceptjs": "0.4",
+    "eslint-plugin-flowtype": "2.50.0",
+    "eslint-plugin-graphql": "2.1.1",
+    "eslint-plugin-import": "2",
+    "eslint-plugin-jest": "21",
+    "eslint-plugin-jsx-a11y": "5",
+    "eslint-plugin-prettier": "2.6.2",
+    "eslint-plugin-react": "7",
+    "eslint-watch": "3"
+  }
+}

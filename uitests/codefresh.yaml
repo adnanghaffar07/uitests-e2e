@@ -1,0 +1,95 @@
+version: '1.0'
+steps:
+  SetNameSpace:
+    title: Set Namespace
+    image: alpine
+    commands:
+      - cf_export NAMESPACE=`echo ${{CF_BRANCH}} | sed 's/[^a-zA-Z0-9]/-/g'`
+
+  SetVariablesTestingEnvironment:
+    title: Export Testing Environment Variables
+    image: alpine
+    commands:
+      - cf_export API_HOST=https://${{NAMESPACE}}-app.aitest.co
+      - cf_export SURVEY_HOST=https://${{NAMESPACE}}-survey.aitest.co
+    when:
+      branch:
+        ignore:
+          - master
+          - production
+
+  SetVariablesMaster:
+    title: Export Master Environment Variables
+    image: alpine
+    commands:
+      - cf_export API_HOST=https://app.aitest.co
+      - cf_export SURVEY_HOST=https://aitest.co
+    when:
+      branch:
+        only:
+          - master
+
+  SetVariablesProduction:
+    title: Export Production Environment Variables
+    image: alpine
+    commands:
+      - cf_export API_HOST=https://app.gptw.care
+      - cf_export SURVEY_HOST=https://gptw.care
+    when:
+      branch:
+        only:
+          - production
+
+  BuildUITests:
+    type: build
+    title: Build UI Tests Image
+    dockerfile: Dockerfile
+    working_directory: ${{main_clone}}/uitests
+    image_name: uitests
+    tag: ${{CF_REVISION}}
+
+  RunOnBrowserStack:
+    title: Run on Browserstack
+    image: ${{BuildUITests}}
+    working_directory: ${{main_clone}}/uitests
+    commands:
+      - printenv
+      - yarn run-full-suite-on-browserstack
+
+  # SetDeploymentStatusToSuccess:
+  #   title: Update BrowserStack status to success
+  #   image: cloudposse/github-status-updater
+  #   environment:
+  #     - GITHUB_ACTION=update_state
+  #     - GITHUB_TOKEN=${{GITHUB_TOKEN}}
+  #     - GITHUB_OWNER=${{CF_REPO_OWNER}}
+  #     - GITHUB_REPO=${{CF_REPO_NAME}}
+  #     - GITHUB_REF=${{CF_REVISION}}
+  #     - GITHUB_CONTEXT=BrowserStack
+  #     - GITHUB_STATE=success
+  #     - GITHUB_DESCRIPTION=Browser tests passed
+  #     - GITHUB_TARGET_URL=https://automate.browserstack.com/
+  #   when:
+  #     steps:
+  #       - name: RunOnBrowserStack
+  #         on:
+  #           - success
+
+  # SetDeploymentStatusToFailure:
+  #   title: Update BrowserStack status to failure
+  #   image: cloudposse/github-status-updater
+  #   environment:
+  #     - GITHUB_ACTION=update_state
+  #     - GITHUB_TOKEN=${{GITHUB_TOKEN}}
+  #     - GITHUB_OWNER=${{CF_REPO_OWNER}}
+  #     - GITHUB_REPO=${{CF_REPO_NAME}}
+  #     - GITHUB_REF=${{CF_REVISION}}
+  #     - GITHUB_CONTEXT=BrowserStack
+  #     - GITHUB_STATE=failure
+  #     - GITHUB_DESCRIPTION=Browser tests did not passed
+  #     - GITHUB_TARGET_URL=https://automate.browserstack.com/
+  #   when:
+  #     steps:
+  #       - name: RunOnBrowserStack
+  #         on:
+  #           - failure
